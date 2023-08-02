@@ -2,7 +2,7 @@
  * @Author: hugo lee hugo2lee@gmail.com
  * @Date: 2023-07-31 11:45
  * @LastEditors: hugo lee hugo2lee@gmail.com
- * @LastEditTime: 2023-08-02 17:39
+ * @LastEditTime: 2023-08-02 18:35
  * @FilePath: /geektime-basic-go/homework/week1/slice.go
  * @Description:
  *
@@ -37,7 +37,10 @@ func DeleteAtWithCopy[T any](s []T, idx int) ([]T, error) {
 	if idx >= len(s) {
 		return nil, ErrIndexOutOfRange
 	}
-	return s[:idx+copy(s[idx:], s[idx+1:])], nil
+	r := make([]T, len(s)-1)
+	copy(r, s[:idx])
+	copy(r[idx:], s[idx+1:])
+	return r, nil
 }
 
 func DeleteAtWithGC[T any](s []T, idx int) ([]T, error) {
