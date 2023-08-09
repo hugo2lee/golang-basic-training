@@ -3,9 +3,10 @@ package dao
 import (
 	"context"
 	"errors"
+	"time"
+
 	"github.com/go-sql-driver/mysql"
 	"gorm.io/gorm"
-	"time"
 )
 
 var (
@@ -28,6 +29,21 @@ func (dao *UserDAO) FindByEmail(ctx context.Context, email string) (User, error)
 	err := dao.db.WithContext(ctx).Where("email = ?", email).First(&u).Error
 	//err := dao.db.WithContext(ctx).First(&u, "email = ?", email).Error
 	return u, err
+}
+
+func (dao *UserDAO) FindById(ctx context.Context, id int64) (User, error) {
+	var u User
+	err := dao.db.WithContext(ctx).Where("id = ?", id).First(&u).Error
+	//err := dao.db.WithContext(ctx).First(&u, "email = ?", email).Error
+	if err == gorm.ErrRecordNotFound {
+		err = ErrUserNotFound
+	}
+	return u, err
+}
+
+func (dao *UserDAO) UpdateById(ctx context.Context, u User) error {
+	// 零值不更新, 填写了才会依据id去更新
+	return dao.db.Updates(&u).Error
 }
 
 func (dao *UserDAO) Insert(ctx context.Context, u User) error {
@@ -55,6 +71,9 @@ type User struct {
 	Password string
 
 	// 往这面加
+	Nickname     string
+	Birthday     string
+	Introduction string
 
 	// 创建时间，毫秒数
 	Ctime int64

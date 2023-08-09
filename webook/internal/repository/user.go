@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+
 	"gitee.com/geekbang/basic-go/webook/internal/domain"
 	"gitee.com/geekbang/basic-go/webook/internal/repository/dao"
 )
@@ -41,8 +42,32 @@ func (r *UserRepository) Create(ctx context.Context, u domain.User) error {
 	})
 }
 
-func (r *UserRepository) FindById(int64) {
+func (r *UserRepository) UpdateById(ctx context.Context, user domain.User) error {
+	return r.dao.UpdateById(ctx, dao.User{
+		Id:           user.Id,
+		Nickname:     user.Nickname,
+		Birthday:     user.Birthday,
+		Introduction: user.Introduction,
+	})
+}
+
+func (r *UserRepository) FindById(ctx context.Context, id int64) (domain.User, error) {
 	// 先从 cache 里面找
 	// 再从 dao 里面找
 	// 找到了回写 cache
+	u, err := r.dao.FindById(ctx, id)
+	if err != nil {
+		if err == dao.ErrUserNotFound {
+			err = ErrUserNotFound
+		}
+		return domain.User{}, err
+	}
+	return domain.User{
+		Id:           u.Id,
+		Email:        u.Email,
+		Nickname:     u.Nickname,
+		Birthday:     u.Birthday,
+		Introduction: u.Introduction,
+		Ctime:        u.Ctime,
+	}, nil
 }

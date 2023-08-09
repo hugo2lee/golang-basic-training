@@ -1,7 +1,7 @@
 version: '3.0'
 services:
-  mysql8:
-    image: mysql:8.0.29
+  mysql:
+    image: mysql:latest
     restart: always
     command: --default-authentication-plugin=mysql_native_password
     environment:
@@ -11,10 +11,43 @@ services:
       - ./script/mysql/:/docker-entrypoint-initdb.d/
     ports:
       #      注意这里我映射为了 13316 端口
-      - "13316:3306"
-#  redis:
-#    image: 'bitnami/redis:latest'
-#    environment:
-#      - ALLOW_EMPTY_PASSWORD=yes
-#    ports:
-#      - '6379:6379'
+      - "3306:3306"
+  redis:
+   image: 'redis:alpine'
+   restart: always
+   environment:
+     - ALLOW_EMPTY_PASSWORD=yes
+   ports:
+     - '6379:6379'
+  webook:
+    image: golang:alpine
+    working_dir: /app
+    depends_on:
+      redis:
+        condition: service_started
+      mysql:
+        condition: service_started
+    environment:
+      - GO111MODULE=on
+      - GOPROXY=https://goproxy.cn,direct
+      - CGO_ENABLED=0
+      - GOOS=linux
+      - GOARCH=arm64
+      - XDG_CACHE_HOME=/tmp/.cache
+    volumes:
+      - $PWD/../:/app
+      - $GOPATH:/go
+    command: ["go", "run", "webook/main.go"]
+    ports:
+      - '8080:8080'
+  webook-fe:
+    image: node:alpine
+    depends_on:
+      webook:
+        condition: service_started
+    working_dir: /app
+    volumes:
+      - ../webook-fe:/app
+    command: sh -c "rm package-lock.json && npm install --registry=https://registry.npmmirror.com && npm run dev"
+    ports:
+      - "80:3000"

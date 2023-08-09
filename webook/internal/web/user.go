@@ -1,12 +1,14 @@
 package web
 
 import (
+	"net/http"
+	"time"
+
 	"gitee.com/geekbang/basic-go/webook/internal/domain"
 	"gitee.com/geekbang/basic-go/webook/internal/service"
 	regexp "github.com/dlclark/regexp2"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 // UserHandler 我准备在它上面定义跟用户有关的路由
@@ -14,19 +16,23 @@ type UserHandler struct {
 	svc         *service.UserService
 	emailExp    *regexp.Regexp
 	passwordExp *regexp.Regexp
+	birthdayExp *regexp.Regexp
 }
 
 func NewUserHandler(svc *service.UserService) *UserHandler {
 	const (
 		emailRegexPattern    = "^\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$"
 		passwordRegexPattern = `^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,}$`
+		birthdayRegexPattern = `^(19|20)\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])$`
 	)
 	emailExp := regexp.MustCompile(emailRegexPattern, regexp.None)
 	passwordExp := regexp.MustCompile(passwordRegexPattern, regexp.None)
+	birthdayExp := regexp.MustCompile(birthdayRegexPattern, regexp.None)
 	return &UserHandler{
 		svc:         svc,
 		emailExp:    emailExp,
 		passwordExp: passwordExp,
+		birthdayExp: birthdayExp,
 	}
 }
 
@@ -133,9 +139,78 @@ func (u *UserHandler) Login(ctx *gin.Context) {
 }
 
 func (u *UserHandler) Edit(ctx *gin.Context) {
+	type editReq struct {
+		Nickname     string `json:"nickname"`
+		Birthday     string `json:"birthday"`
+		Introduction string `json:"introduction"`
+	}
+	var req editReq
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.String(http.StatusOK, "解析编辑信息出错")
+		return
+	}
+	if len(req.Nickname) == 0 || len(req.Nickname) > 10 {
+		ctx.String(http.StatusOK, "昵称长度非法")
+		return
+	}
+	if len(req.Introduction) == 0 || len(req.Introduction) > 100 {
+		ctx.String(http.StatusOK, "简介长度非法")
+		return
+	}
+	ok, err := u.birthdayExp.MatchString(req.Birthday)
+	if err != nil {
+		// 记录日志
+		ctx.String(http.StatusOK, "系统错误")
+		return
+	}
+	if !ok {
+		ctx.String(http.StatusOK, "生日格式错误")
+		return
+	}
 
+	sess := sessions.Default(ctx)
+	id, ok := sess.Get("userId").(int64)
+	if !ok {
+		ctx.String(http.StatusOK, "获取登录id出错")
+		return
+	}
+	if err := u.svc.Edit(ctx.Request.Context(), domain.User{
+		Id:           id,
+		Nickname:     req.Nickname,
+		Birthday:     req.Birthday,
+		Introduction: req.Introduction,
+	}); err != nil {
+		ctx.String(http.StatusOK, "更新信息出错")
+	}
+	ctx.String(http.StatusOK, "更新信息成功")
 }
 
 func (u *UserHandler) Profile(ctx *gin.Context) {
-	ctx.String(http.StatusOK, "这是你的 Profile")
+	sess := sessions.Default(ctx)
+	id, ok := sess.Get("userId").(int64)
+	if !ok {
+		ctx.String(http.StatusOK, "获取登录id出错")
+		return
+	}
+	user, err := u.svc.Profile(ctx.Request.Context(), id)
+	if err == service.ErrUserNotFound {
+		ctx.String(http.StatusOK, "用户不存在")
+		return
+	}
+	type profileResp struct {
+		Id           int64  `json:"id"`
+		Email        string `json:"email"`
+		Ctime        string `json:"create_time"`
+		Nickname     string `json:"nickname"`
+		Birthday     string `json:"birthday"`
+		Introduction string `json:"introduction"`
+	}
+	ctx.JSON(http.StatusOK, profileResp{
+		Id:           user.Id,
+		Email:        user.Email,
+		Nickname:     user.Nickname,
+		Birthday:     user.Birthday,
+		Introduction: user.Introduction,
+		Ctime:        time.UnixMilli(user.Ctime).Local().Format("2006-01-02 15:04:05"),
+	})
 }

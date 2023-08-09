@@ -3,12 +3,14 @@ package service
 import (
 	"context"
 	"errors"
+
 	"gitee.com/geekbang/basic-go/webook/internal/domain"
 	"gitee.com/geekbang/basic-go/webook/internal/repository"
 	"golang.org/x/crypto/bcrypt"
 )
 
 var ErrUserDuplicateEmail = repository.ErrUserDuplicateEmail
+var ErrUserNotFound = repository.ErrUserNotFound
 var ErrInvalidUserOrPassword = errors.New("账号/邮箱或密码不对")
 
 type UserService struct {
@@ -48,4 +50,16 @@ func (svc *UserService) SignUp(ctx context.Context, u domain.User) error {
 	u.Password = string(hash)
 	// 然后就是，存起来
 	return svc.repo.Create(ctx, u)
+}
+
+func (svc *UserService) Edit(ctx context.Context, user domain.User) error {
+	return svc.repo.UpdateById(ctx, user)
+}
+
+func (svc *UserService) Profile(ctx context.Context, id int64) (domain.User, error) {
+	u, err := svc.repo.FindById(ctx, id)
+	if err == repository.ErrUserNotFound {
+		return domain.User{}, ErrUserNotFound
+	}
+	return u, nil
 }
