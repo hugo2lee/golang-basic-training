@@ -1,9 +1,6 @@
 package main
 
 import (
-	"strings"
-	"time"
-
 	"gitee.com/geekbang/basic-go/webook/config"
 
 	"net/http"

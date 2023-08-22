@@ -2,7 +2,7 @@
  * @Author: hugo lee hugo2lee@gmail.com
  * @Date: 2023-08-22 17:31
  * @LastEditors: hugo lee hugo2lee@gmail.com
- * @LastEditTime: 2023-08-22 17:33
+ * @LastEditTime: 2023-08-22 17:37
  * @FilePath: /geektime-basic-go/webook/internal/service/user.go
  * @Description:
  *
@@ -61,6 +61,10 @@ func (svc *UserService) SignUp(ctx context.Context, u domain.User) error {
 	u.Password = string(hash)
 	// 然后就是，存起来
 	return svc.repo.Create(ctx, u)
+}
+
+func (svc *UserService) Edit(ctx context.Context, user domain.User) error {
+	return svc.repo.UpdateById(ctx, user)
 }
 
 func (svc *UserService) Profile(ctx context.Context,

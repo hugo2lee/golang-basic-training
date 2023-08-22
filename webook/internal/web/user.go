@@ -11,8 +11,6 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	jwt "github.com/golang-jwt/jwt/v5"
-	"net/http"
-	"time"
 )
 
 // UserHandler 我准备在它上面定义跟用户有关的路由

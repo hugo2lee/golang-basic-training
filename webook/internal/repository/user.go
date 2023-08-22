@@ -2,7 +2,7 @@
  * @Author: hugo lee hugo2lee@gmail.com
  * @Date: 2023-08-22 17:31
  * @LastEditors: hugo lee hugo2lee@gmail.com
- * @LastEditTime: 2023-08-22 17:33
+ * @LastEditTime: 2023-08-22 17:38
  * @FilePath: /geektime-basic-go/webook/internal/repository/user.go
  * @Description:
  *
@@ -52,6 +52,15 @@ func (r *UserRepository) Create(ctx context.Context, u domain.User) error {
 	return r.dao.Insert(ctx, dao.User{
 		Email:    u.Email,
 		Password: u.Password,
+	})
+}
+
+func (r *UserRepository) UpdateById(ctx context.Context, user domain.User) error {
+	return r.dao.UpdateById(ctx, dao.User{
+		Id:           user.Id,
+		Nickname:     user.Nickname,
+		Birthday:     user.Birthday,
+		Introduction: user.Introduction,
 	})
 }
 

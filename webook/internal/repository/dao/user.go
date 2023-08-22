@@ -2,7 +2,7 @@
  * @Author: hugo lee hugo2lee@gmail.com
  * @Date: 2023-08-22 17:31
  * @LastEditors: hugo lee hugo2lee@gmail.com
- * @LastEditTime: 2023-08-22 17:34
+ * @LastEditTime: 2023-08-22 17:38
  * @FilePath: /geektime-basic-go/webook/internal/repository/dao/user.go
  * @Description:
  *
@@ -80,4 +80,9 @@ type User struct {
 	Ctime int64
 	// 更新时间，毫秒数
 	Utime int64
+}
+
+func (dao *UserDAO) UpdateById(ctx context.Context, u User) error {
+	// 零值不更新, 填写了才会依据id去更新
+	return dao.db.Updates(&u).Error
 }
