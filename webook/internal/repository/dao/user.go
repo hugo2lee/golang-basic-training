@@ -1,3 +1,13 @@
+/*
+ * @Author: hugo lee hugo2lee@gmail.com
+ * @Date: 2023-08-22 17:31
+ * @LastEditors: hugo lee hugo2lee@gmail.com
+ * @LastEditTime: 2023-08-22 17:34
+ * @FilePath: /geektime-basic-go/webook/internal/repository/dao/user.go
+ * @Description:
+ *
+ * Copyright (c) 2023 by hugo, All Rights Reserved.
+ */
 package dao
 
 import (
@@ -33,17 +43,8 @@ func (dao *UserDAO) FindByEmail(ctx context.Context, email string) (User, error)
 
 func (dao *UserDAO) FindById(ctx context.Context, id int64) (User, error) {
 	var u User
-	err := dao.db.WithContext(ctx).Where("id = ?", id).First(&u).Error
-	//err := dao.db.WithContext(ctx).First(&u, "email = ?", email).Error
-	if err == gorm.ErrRecordNotFound {
-		err = ErrUserNotFound
-	}
+	err := dao.db.WithContext(ctx).Where("`id` = ?", id).First(&u).Error
 	return u, err
-}
-
-func (dao *UserDAO) UpdateById(ctx context.Context, u User) error {
-	// 零值不更新, 填写了才会依据id去更新
-	return dao.db.Updates(&u).Error
 }
 
 func (dao *UserDAO) Insert(ctx context.Context, u User) error {
