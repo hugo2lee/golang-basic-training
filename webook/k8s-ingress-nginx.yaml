@@ -20,3 +20,10 @@ spec:
                   number: 81
             pathType: Prefix
             path: /
+          - backend:
+              service:
+                name: webook-live-fe
+                port:
+                  number: 82
+            pathType: Prefix
+            path: /

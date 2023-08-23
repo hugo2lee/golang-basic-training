@@ -1,7 +1,17 @@
+/*
+ * @Author: hugo lee hugo2lee@gmail.com
+ * @Date: 2023-08-07 09:37
+ * @LastEditors: hugo lee hugo2lee@gmail.com
+ * @LastEditTime: 2023-08-23 16:16
+ * @FilePath: /geektime-basic-go/webook-fe/src/axios/axios.ts
+ * @Description: 
+ * 
+ * Copyright (c) 2023 by hugo, All Rights Reserved. 
+ */
 import axios from "axios";
 const instance = axios.create({
     // 这边记得修改你对应的配置文件
-    baseURL:  "http://localhost:8080",
+    baseURL:  "http://live.webook.com:81",
     withCredentials: true
 })
 

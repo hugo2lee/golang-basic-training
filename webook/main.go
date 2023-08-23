@@ -32,7 +32,7 @@ func main() {
 		ctx.String(http.StatusOK, "你好，你来了")
 	})
 
-	server.Run(":8080")
+	server.Run(":8081")
 }
 
 func initWebServer() *gin.Engine {
@@ -64,7 +64,7 @@ func initWebServer() *gin.Engine {
 				// 你的开发环境
 				return true
 			}
-			return strings.Contains(origin, "yourcompany.com")
+			return strings.Contains(origin, "live.webook.com")
 		},
 		MaxAge: 12 * time.Hour,
 	}))
@@ -90,6 +90,7 @@ func initWebServer() *gin.Engine {
 	//	IgnorePaths("/users/signup").
 	//	IgnorePaths("/users/login").Build())
 	server.Use(middleware.NewLoginJWTMiddlewareBuilder().
+		IgnorePaths("/hello").
 		IgnorePaths("/users/signup").
 		IgnorePaths("/users/login").Build())
 
