@@ -1,3 +1,13 @@
+/*
+ * @Author: hugo2lee hugo2lee@gmail.com
+ * @Date: 2023-09-03 13:46
+ * @LastEditors: hugo2lee hugo2lee@gmail.com
+ * @LastEditTime: 2023-09-03 13:47
+ * @FilePath: /geektime-basic-go/webook/internal/repository/cache/code.go
+ * @Description:
+ *
+ * Copyright (c) 2023 by hugo, All Rights Reserved.
+ */
 package cache
 
 import (
@@ -5,6 +15,7 @@ import (
 	_ "embed"
 	"errors"
 	"fmt"
+
 	"github.com/redis/go-redis/v9"
 )
 
@@ -18,7 +29,7 @@ var (
 	ErrCodeVerifyTooManyTimes = errors.New("验证次数太多")
 )
 
-type CodeCache interface {
+type CodeRedisCache interface {
 	Set(ctx context.Context, biz string,
 		phone string, code string) error
 
@@ -31,7 +42,7 @@ type RedisCodeCache struct {
 	redis redis.Cmdable
 }
 
-func NewRedisCodeCache(cmd redis.Cmdable) CodeCache {
+func NewRedisCodeCache(cmd redis.Cmdable) CodeRedisCache {
 	return &RedisCodeCache{
 		redis: cmd,
 	}

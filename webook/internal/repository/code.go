@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+
 	"gitee.com/geekbang/basic-go/webook/internal/repository/cache"
 )
 
@@ -19,10 +20,10 @@ type CodeRepository interface {
 }
 
 type CachedCodeRepository struct {
-	cache cache.CodeCache
+	cache cache.CodeRedisCache
 }
 
-func NewCachedCodeRepository(c cache.CodeCache) CodeRepository {
+func NewCachedCodeRepository(c cache.CodeRedisCache) CodeRepository {
 	return &CachedCodeRepository{
 		cache: c,
 	}
